@@ -2,16 +2,17 @@
 // controller ends up here, so route handlers can stay free of try/catch
 // boilerplate for error responses.
 export function errorHandler(err, req, res, next) {
-  const statusCode = err.isAppError ? err.statusCode : 500;
-  const message = err.isAppError ? err.message : "Internal server error";
+  const statusCode = err.isAppError ? err.statusCode : (err.statusCode || 500);
+  const message = err.message || "Internal server error";
 
-  if (!err.isAppError) {
+  if (!err.isAppError && statusCode >= 500) {
     console.error("Unexpected error:", err);
   }
 
   res.status(statusCode).json({
     success: false,
     error: message,
+    message: message,
   });
 }
 

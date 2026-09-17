@@ -23,6 +23,8 @@ export async function register(req, res, next) {
 
     if (result.rows.length) {
       return res.status(400).json({
+        success: false,
+        error: "Email already exists",
         message: "Email already exists",
       });
     }
@@ -41,6 +43,7 @@ export async function register(req, res, next) {
     res.cookie(COOKIE_NAME, token, cookieOptions);
 
     res.status(201).json({
+      success: true,
       message: "Registration successful",
       user: user.rows[0],
     });
@@ -62,6 +65,8 @@ export async function login(req, res, next) {
 
     if (!result.rows.length) {
       return res.status(401).json({
+        success: false,
+        error: "Invalid email or password",
         message: "Invalid email or password",
       });
     }
@@ -75,6 +80,8 @@ export async function login(req, res, next) {
 
     if (!validPassword) {
       return res.status(401).json({
+        success: false,
+        error: "Invalid email or password",
         message: "Invalid email or password",
       });
     }
@@ -84,6 +91,7 @@ export async function login(req, res, next) {
     res.cookie(COOKIE_NAME, token, cookieOptions);
 
     res.json({
+      success: true,
       message: "Login successful",
       user: {
         id: user.id,
@@ -107,11 +115,14 @@ export async function me(req, res, next) {
 
     if (!result.rows.length) {
       return res.status(404).json({
+        success: false,
+        error: "User not found",
         message: "User not found",
       });
     }
 
     res.json({
+      success: true,
       user: result.rows[0],
     });
   } catch (error) {

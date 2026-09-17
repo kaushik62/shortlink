@@ -19,9 +19,13 @@ export async function createShortUrl(originalUrl, userId) {
   );
 
   // Store in Redis for 24 hours
-  await redis.set(shortCode, originalUrl, {
-    EX: 60 * 60 * 24
-  });
+  try {
+    await redis.set(shortCode, originalUrl, {
+      EX: 60 * 60 * 24
+    });
+  } catch (err) {
+    console.error("Redis set error:", err);
+  }
 
   return url.rows[0];
 }
@@ -30,7 +34,7 @@ export async function createShortUrl(originalUrl, userId) {
 // Get user's URLs
 export async function listUrls(userId) {
   const result = await pool.query(
-    "SELECT * FROM urls WHERE user_id = $1",
+    "SELECT * FROM urls WHERE user_id = $1 ORDER BY created_at DESC",
     [userId]
   );
 
@@ -51,17 +55,31 @@ export async function getUrlById(id, userId) {
 
 // Delete URL
 export async function deleteUrl(id, userId) {
-  await pool.query(
-    "DELETE FROM urls WHERE id = $1 AND user_id = $2",
+  const result = await pool.query(
+    "DELETE FROM urls WHERE id = $1 AND user_id = $2 RETURNING short_code",
     [id, userId]
   );
+
+  if (result.rows.length > 0) {
+    const shortCode = result.rows[0].short_code;
+    try {
+      await redis.del(shortCode);
+    } catch (err) {
+      console.error("Redis del error:", err);
+    }
+  }
 }
 
 
 // Redirect URL
 export async function resolveAndTrackClick(shortCode) {
   // Check Redis
-  let originalUrl = await redis.get(shortCode);
+  let originalUrl = null;
+  try {
+    originalUrl = await redis.get(shortCode);
+  } catch (err) {
+    console.error("Redis get error:", err);
+  }
 
   // If not in Redis, check PostgreSQL
   if (!originalUrl) {
@@ -77,14 +95,18 @@ export async function resolveAndTrackClick(shortCode) {
     originalUrl = result.rows[0].original_url;
 
     // Store in Redis for another 24 hours
-    await redis.set(shortCode, originalUrl, {
-      EX: 60 * 60 * 24
-    });
+    try {
+      await redis.set(shortCode, originalUrl, {
+        EX: 60 * 60 * 24
+      });
+    } catch (err) {
+      console.error("Redis set error:", err);
+    }
   }
 
-  // Increase clicks
+  // Increase clicks and update last_accessed_at
   await pool.query(
-    "UPDATE urls SET clicks = clicks + 1 WHERE short_code = $1",
+    "UPDATE urls SET clicks = clicks + 1, last_accessed_at = NOW() WHERE short_code = $1",
     [shortCode]
   );
 

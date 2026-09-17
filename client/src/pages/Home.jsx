@@ -12,10 +12,6 @@ export default function Home() {
         <div className="absolute -bottom-32 -left-24 h-80 w-80 rounded-full bg-slate-700/30 blur-3xl" />
 
         <div className="relative mx-auto max-w-3xl text-center">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold tracking-wide text-slate-200">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            FAST · PRIVATE · RELIABLE
-          </div>
 
           <h1 className="text-4xl font-black tracking-tight sm:text-6xl">
             One long URL.

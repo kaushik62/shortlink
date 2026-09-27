@@ -10,3 +10,4 @@ export const createUrlSchema = z.object({
     .min(1, "originalUrl is required")
     .url("originalUrl must be a valid URL (include http:// or https://)"),
 });
+

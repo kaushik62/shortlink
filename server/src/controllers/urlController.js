@@ -76,7 +76,6 @@ export async function getUrl(req, res, next) {
   }
 }
 
-// Delete URL
 export async function removeUrl(req, res, next) {
   try {
     await urlService.deleteUrl(

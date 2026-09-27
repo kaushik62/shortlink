@@ -6,6 +6,10 @@ const pool = new Pool({
     "postgresql://postgres:postgres@localhost:5432/url_shortener",
 });
 
+pool.on("connect", () => {
+  console.log("PostgreSQL connected");
+});
+
 pool.on("error", (err) => {
   console.error("Unexpected PostgreSQL error:", err.message);
 });

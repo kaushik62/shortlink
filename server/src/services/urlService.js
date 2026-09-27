@@ -70,7 +70,6 @@ export async function deleteUrl(id, userId) {
   }
 }
 
-
 // Redirect URL
 export async function resolveAndTrackClick(shortCode) {
   // Check Redis

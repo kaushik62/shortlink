@@ -99,6 +99,8 @@ export async function redirectToOriginal(req, res, next) {
       req.params.shortCode
     );
 
+    console.log("Original URL:", originalUrl);
+
     res.redirect(originalUrl);
   } catch (error) {
     if (error.message === "URL not found") {
